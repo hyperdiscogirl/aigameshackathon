@@ -42,6 +42,7 @@ export type Session = {
 		numOptions: number;
 		timerLimit: number;
 	};
+	hasStarted: boolean;
 	teamname: string;
 	admin: User;
 	players: User[];

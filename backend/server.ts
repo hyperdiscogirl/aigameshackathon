@@ -1,6 +1,7 @@
 import express, {Request, Response} from 'express'
-import { Session } from './data'
-import {SessionCreate} from './database'
+import { Session, Option, User} from './data'
+import {SessionCreate, SessionRead} from './database'
+import { GameLogic } from './game_logic'
 // import { PrismaClient } from '@prisma/client'
 
 // const prisma = new PrismaClient()
@@ -19,11 +20,47 @@ app.post('/create-session', (req: Request, res: Response) => {
 		settings: {numRounds: 5, numOptions: 15, timerLimit: 30},
 		teamname: teamname,
 		admin: admin,
-		players: [admin]
+		players: [admin],
+		hasStarted: false
 	 }
 	 SessionCreate(session)
 	 res.send('Hello World!')
 	})
+
+app.get('/get-session', (req: Request, res: Response) => {
+	const session = SessionRead("1")
+	res.send(session)
+})
+
+app.post('/join-session', (req: Request, res: Response) => {
+	const {username} = req.body
+	const session = SessionRead("1")
+	session.players.push({name: username as string, id: username as string})
+	SessionCreate(session)
+})
+
+app.post('/start-game', (req: Request, res: Response) => {
+	const session = SessionRead("1")
+	session.gameState = {
+		curRound: {
+			turns: []
+		},
+		curTurn: {
+			options: GameLogic.generateOptions(session.settings.numOptions, []),
+			userChoices: []
+		},
+		prevRounds: []
+	}
+	SessionCreate(session)
+})
+
+app.post('/submit-choice', (req: Request, res: Response) => {
+	const {option, user} = req.body
+	const session = SessionRead("1")
+	const choice = {user: user as User, option: option as Option}
+	session.gameState?.curTurn.userChoices.push(choice)
+
+})
 
 
 app.get('/', (req: Request, res: Response) => {
