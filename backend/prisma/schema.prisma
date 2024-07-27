@@ -16,6 +16,7 @@ datasource db {
 model Session {
   sessionId String    @id @default(auto()) @map("_id") @db.ObjectId
   settings SessionSettings
+  teamName String
   admin User
   players User[]
   gameState GameState?
