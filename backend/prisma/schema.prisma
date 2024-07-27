@@ -9,19 +9,50 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Session {
-  sessionId Int @id @default(autoincrement())
-  adminId   Int
-
-  admin User @relation(fields: [adminId], references: [userId])
+  sessionId String    @id @default(auto()) @map("_id") @db.ObjectId
+  settings SessionSettings
+  admin User
+  players User[]
+  gameState GameState?
 }
 
-model User {
-  userId   Int       @id @default(autoincrement())
+type GameState {
+  curRound Round
+  curTurn Turn
+  prevRounds Round[]
+}
+
+type SessionSettings {
+  numRounds Int
+  timerLimit Int
+  numOptions Int
+}
+
+type User {
+  userId   Int
   username String
-  Session  Session[]
+}
+
+type Round {
+  turns Turn[]
+}
+
+type Turn {
+  options Option[]
+  userChoices Choice[]
+}
+
+type Choice {
+  user User
+  option Option
+}
+
+type Option {
+  text String
+  emoji String
 }
